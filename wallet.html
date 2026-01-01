@@ -93,7 +93,81 @@ document.getElementById("balance").innerText = wallet;
 function goHome() {
   location.href = "travel.html";
 }
+
+/* =========================
+   WALLET CONFIG
+========================= */
+
+// Set default wallet balance (only first time)
+if (!localStorage.getItem("walletBalance")) {
+  localStorage.setItem("walletBalance", "150"); // default ₹150
+}
+
+// Get wallet balance
+function getWalletBalance() {
+  return parseInt(localStorage.getItem("walletBalance"));
+}
+
+// Update wallet UI
+function updateWalletUI() {
+  const balanceEl = document.getElementById("walletBalance");
+  if (balanceEl) {
+    balanceEl.innerText = "₹" + getWalletBalance();
+  }
+}
+
+// Add money to wallet
+function addMoney(amount) {
+  let balance = getWalletBalance();
+  balance += amount;
+  localStorage.setItem("walletBalance", balance);
+  updateWalletUI();
+  alert("₹" + amount + " added successfully");
+}
+
+// Pay using wallet (USED BY OTHER PAGES)
+function payWithWallet(amount) {
+  let balance = getWalletBalance();
+
+  if (balance < amount) {
+    alert("❌ Payment Failed: Insufficient Wallet Balance");
+    return false;
+  }
+
+  balance -= amount;
+  localStorage.setItem("walletBalance", balance);
+  updateWalletUI();
+
+  alert("✅ Payment Successful");
+  return true;
+}
+
+/* =========================
+   🔗 COMPATIBILITY PATCH
+   (ADDED — NO EXISTING CODE TOUCHED)
+========================= */
+
+// Sync walletBalance → wallet
+function syncWallet() {
+  let wb = parseInt(localStorage.getItem("walletBalance"));
+  if (isNaN(wb)) wb = 0;
+
+  localStorage.setItem("wallet", wb);
+  document.getElementById("balance").innerText = wb;
+}
+
+// Override update to use existing UI
+window.addEventListener("load", syncWallet);
+
+// Make payment update visible balance
+const _pay = payWithWallet;
+payWithWallet = function(amount) {
+  const result = _pay(amount);
+  syncWallet();
+  return result;
+};
 </script>
 
 </body>
 </html>
+
