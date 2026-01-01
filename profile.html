@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Profile – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family: Arial;
+  background:#f3f4f6;
+  margin:0;
+  padding:20px;
+}
+
+/* HEADER */
+header{
+  background:#60a5fa;
+  color:#fff;
+  padding:12px;
+  border-radius:14px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.back-btn{
+  background:#fff;
+  color:#2563eb;
+  border:none;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  line-height:1;
+}
+
+header h3{
+  margin:0;
+  text-align:center;
+  font-size:18px;
+}
+
+/* 🔥 AVATAR */
+.avatar-wrap{
+  display:flex;
+  justify-content:center;
+  margin:20px 0;
+}
+
+.avatar{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:#2563eb;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:36px;
+  font-weight:bold;
+  box-shadow:0 6px 14px rgba(0,0,0,.2);
+}
+
+/* CARDS */
+.card{
+  background:#fff;
+  padding:18px;
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+  margin-bottom:20px;
+}
+
+label{
+  font-size:13px;
+  font-weight:bold;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0 12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.save-btn{
+  background:#2563eb;
+  color:#fff;
+}
+
+.change-btn{
+  background:#16a34a;
+  color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="back-btn" onclick="goBack()">←</button>
+  <h3>My Profile</h3>
+  <div></div>
+</header>
+
+<!-- 🔥 AVATAR SECTION -->
+<div class="avatar-wrap">
+  <div class="avatar" id="avatarText">U</div>
+</div>
+
+<!-- EDIT PROFILE -->
+<div class="card">
+  <h3>Edit Profile</h3>
+
+  <label>Name</label>
+  <input type="text" id="editName">
+
+  <label>Contact</label>
+  <input type="text" id="editContact" disabled>
+
+  <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+</div>
+
+<!-- CHANGE PASSWORD -->
+<div class="card">
+  <h3>Change Password</h3>
+
+  <input type="password" id="oldPass" placeholder="Current password">
+  <input type="password" id="newPass" placeholder="New password">
+  <input type="password" id="confirmPass" placeholder="Confirm new password">
+
+  <button class="change-btn" onclick="changePassword()">Update Password</button>
+</div>
+
+<script>
+// 🔐 LOGIN CHECK
+if (localStorage.getItem("isLoggedIn") !== "true") {
+  location.href = "login.html";
+}
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let currentContact = localStorage.getItem("currentUser");
+let user = users.find(u => u.contact === currentContact);
+
+if (!user) {
+  alert("Session expired. Please login again.");
+  location.href = "login.html";
+}
+
+// LOAD DATA
+document.getElementById("editName").value = user.name;
+document.getElementById("editContact").value = user.contact;
+
+// 🔥 AVATAR INITIAL
+document.getElementById("avatarText").innerText =
+  user.name.charAt(0).toUpperCase();
+
+// SAVE PROFILE
+function saveProfile(){
+  let newName = document.getElementById("editName").value.trim();
+  if (!newName) {
+    alert("Name cannot be empty");
+    return;
+  }
+
+  user.name = newName;
+  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("currentUserName", newName);
+
+  // 🔄 Update avatar
+  document.getElementById("avatarText").innerText =
+    newName.charAt(0).toUpperCase();
+
+  alert("Profile updated ✔");
+}
+
+// CHANGE PASSWORD
+function changePassword(){
+  let oldP = document.getElementById("oldPass").value;
+  let newP = document.getElementById("newPass").value;
+  let confP = document.getElementById("confirmPass").value;
+
+  if (btoa(oldP) !== user.password) {
+    alert("Current password incorrect");
+    return;
+  }
+
+  if (newP.length < 6) {
+    alert("Password must be at least 6 characters");
+    return;
+  }
+
+  if (newP !== confP) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  user.password = btoa(newP);
+  localStorage.setItem("users", JSON.stringify(users));
+
+  alert("Password updated ✔");
+
+  oldPass.value = newPass.value = confirmPass.value = "";
+}
+
+// BACK
+function goBack(){
+  location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>
+

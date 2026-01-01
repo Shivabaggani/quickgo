@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuickGo Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-box {
+      background: #fff;
+      padding: 30px;
+      width: 320px;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .otp-box {
+      display: none;
+    }
+
+    .note {
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>Login to QuickGo</h2>
+
+  <input type="text" id="user" placeholder="Email or Mobile Number">
+  <input type="password" id="pass" placeholder="Password">
+
+  <div class="checkbox">
+    <input type="checkbox" id="human">
+    <label for="human">I am not a robot</label>
+  </div>
+
+  <!-- ✅ REMEMBER ME -->
+  <div class="checkbox">
+    <input type="checkbox" id="remember">
+    <label for="remember">Remember me</label>
+  </div>
+
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <div class="otp-box" id="otpBox">
+    <input type="text" id="otpInput" placeholder="Enter OTP">
+    <button onclick="verifyLogin()">Verify & Login</button>
+  </div>
+
+  <div class="note">OTP will be sent to your registered email / mobile</div>
+  <div class="note">
+    <a href="forgot-password.html"
+       style="color:#2563eb;text-decoration:none;font-weight:bold;">
+      Forgot Password?
+    </a>
+  </div>
+</div>
+
+<script>
+// 🔁 AUTO LOGIN IF REMEMBERED
+if (
+  localStorage.getItem("rememberMe") === "true" &&
+  localStorage.getItem("currentUser")
+) {
+  localStorage.setItem("isLoggedIn", "true");
+  location.href = "index.html";
+}
+
+let loginOTP = null;
+let loginValue = "";
+
+/* STEP 1: SEND OTP */
+function sendOTP() {
+  loginValue = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value;
+  const human = document.getElementById("human").checked;
+
+  if (!loginValue || !pass) {
+    alert("Please enter Email/Mobile and Password");
+    return;
+  }
+
+  if (!human) {
+    alert("Please verify you are human");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let user = users.find(u => u.contact === loginValue);
+
+  if (!user) {
+    alert("User not found. Please sign up.");
+    location.href = "signup.html";
+    return;
+  }
+
+  if (user.password !== btoa(pass)) {
+    alert("Incorrect password");
+    return;
+  }
+
+  // OTP
+  loginOTP = Math.floor(100000 + Math.random() * 900000);
+  localStorage.setItem("loginOTP", loginOTP);
+  localStorage.setItem("loginOTPExpiry", Date.now() + 60000);
+
+  alert("Your OTP is: " + loginOTP + " (Demo)");
+  document.getElementById("otpBox").style.display = "block";
+}
+
+/* STEP 2: VERIFY OTP */
+function verifyLogin() {
+  const enteredOTP = document.getElementById("otpInput").value.trim();
+  const storedOTP = localStorage.getItem("loginOTP");
+  const expiry = localStorage.getItem("loginOTPExpiry");
+
+  if (!expiry || Date.now() > expiry) {
+    alert("OTP expired");
+    localStorage.removeItem("loginOTP");
+    localStorage.removeItem("loginOTPExpiry");
+    return;
+  }
+
+  if (enteredOTP !== storedOTP) {
+    alert("Invalid OTP");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let user = users.find(u => u.contact === loginValue);
+
+  localStorage.removeItem("loginOTP");
+  localStorage.removeItem("loginOTPExpiry");
+
+  // ✅ REMEMBER ME STORAGE
+  if (document.getElementById("remember").checked) {
+    localStorage.setItem("rememberMe", "true");
+  } else {
+    localStorage.removeItem("rememberMe");
+  }
+
+  localStorage.setItem("currentUser", user.contact);
+  localStorage.setItem("currentUserName", user.name);
+  localStorage.setItem("isLoggedIn", "true");
+
+  alert("Login successful ✔");
+  location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
+

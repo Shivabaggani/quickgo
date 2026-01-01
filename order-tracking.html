@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Order Tracking – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  background: #f3f6fb;
+  padding: 16px;
+}
+
+/* HEADER */
+header{
+  background:#60a5fa;
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-radius:12px;
+  margin-bottom:16px;
+}
+
+.back-btn{
+  background:#fff;
+  color:#2563eb;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* MAP */
+.map {
+  height: 220px;
+  background: linear-gradient(#c7d2fe, #e0e7ff);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.boy {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  font-size: 28px;
+  transition: left 2s linear;
+}
+
+.step {
+  background: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 12px 0;
+  box-shadow: 0 8px 18px rgba(0,0,0,.08);
+}
+
+.step.active {
+  border-left: 6px solid #2563eb;
+}
+
+button.cancel {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  width:100%;
+  background:#ef4444;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <h3>Order Tracking</h3>
+  <button class="back-btn" onclick="goHome()">🏠 Home</button>
+</header>
+
+<div class="map">
+  <div id="boy" class="boy">🛵</div>
+</div>
+
+<div id="steps"></div>
+
+<button class="cancel" id="cancelBtn" onclick="cancelOrder()">
+  Cancel Order
+</button>
+
+<script>
+// 🔐 LOGIN CHECK
+if (localStorage.getItem("isLoggedIn") !== "true") {
+  location.href = "login.html";
+}
+
+// 🔙 BACK
+function goBack(){
+  if (history.length > 1) history.back();
+  else location.href = "food.html";
+}
+
+// 🏠 HOME → FOOD (IMPORTANT FIX)
+function goHome(){
+  location.replace("food.html");
+}
+
+// 📦 LOAD ORDER
+let order = JSON.parse(localStorage.getItem("lastOrder"));
+
+if (!order || !order.items) {
+  alert("No active order found");
+  location.replace("food.html");
+}
+
+const statuses = [
+  "Order Confirmed",
+  "Preparing Food",
+  "Out for Delivery",
+  "Delivered"
+];
+
+const stepsDiv = document.getElementById("steps");
+const boy = document.getElementById("boy");
+const cancelBtn = document.getElementById("cancelBtn");
+
+function render(){
+  stepsDiv.innerHTML = "";
+  statuses.forEach((s, i) => {
+    stepsDiv.innerHTML += `
+      <div class="step ${i <= order.status ? "active" : ""}">
+        ${s}
+      </div>`;
+  });
+
+  if (order.status >= 2) {
+    boy.style.left = "80%";
+  }
+
+  if (order.status >= 3) {
+    cancelBtn.style.display = "none";
+    localStorage.setItem("deliveredOrder", JSON.stringify(order));
+
+    setTimeout(() => {
+      localStorage.removeItem("lastOrder");
+      location.replace("rate-order.html");
+    }, 2000);
+  }
+}
+
+render();
+
+// ⏱ AUTO STATUS UPDATE
+const interval = setInterval(() => {
+  if (order.status < 3) {
+    order.status++;
+    localStorage.setItem("lastOrder", JSON.stringify(order));
+    render();
+  } else {
+    clearInterval(interval);
+  }
+}, 6000);
+
+// ❌ CANCEL ORDER
+function cancelOrder(){
+  let order = JSON.parse(localStorage.getItem("lastOrder"));
+
+  if (!order) {
+    alert("No active order found");
+    return;
+  }
+
+  // ✅ Refund ONLY for ONLINE payments
+  if (order.payment === "upi") {
+
+    let wallet = Number(localStorage.getItem("walletBalance")) || 0;
+
+    // Calculate total
+    let total = 0;
+    order.items.forEach(item => {
+      total += item.price * item.qty;
+    });
+
+    let gst = Math.round(total * 0.05);
+    let refundAmount = total + gst + 30;
+
+    wallet += refundAmount;
+    localStorage.setItem("walletBalance", wallet);
+
+    alert(
+      "Order cancelled successfully ✔\n" +
+      "₹" + refundAmount + " refunded to wallet"
+    );
+
+  } else {
+    // ❌ No refund for COD
+    alert(
+      "Order cancelled successfully ✔\n" +
+      "No refund for Cash on Delivery"
+    );
+  }
+
+  // Update order status
+  order.status = "cancelled";
+  localStorage.setItem("lastOrder", JSON.stringify(order));
+
+  // Redirect user
+  location.href = "food.html";
+}</script>
+
+</body>
+</html>

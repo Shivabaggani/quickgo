@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grocery Checkout – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  padding-bottom: 120px;
+}
+
+.header {
+  background: #22c55e;
+  color: white;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section {
+  background: white;
+  margin: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.08);
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.qty {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.qty button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: #22c55e;
+  color: white;
+  font-size: 18px;
+}
+
+.bill-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.bill-total {
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 14px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.12);
+}
+
+.place-btn {
+  width: 100%;
+  padding: 14px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.coupon-box {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.coupon-box input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.coupon-box button {
+  padding: 10px 14px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div onclick="location.href='groceries.html'">⬅</div>
+  <h2>🧺 Grocery Checkout</h2>
+</div>
+
+<div class="section">
+  ⚡ <b>Delivery in 10 minutes</b><br>
+  📍 Home Address
+</div>
+
+<div class="section">
+  <h3>Your Items</h3>
+  <div id="items"></div>
+</div>
+
+<div class="section">
+  <h3>💸 Apply Coupon</h3>
+  <div class="coupon-box">
+    <input id="couponInput" placeholder="Enter coupon code">
+    <button onclick="applyCoupon()">Apply</button>
+  </div>
+  <div id="couponMsg"></div>
+</div>
+
+<div class="section">
+  <h3>💰 Wallet</h3>
+  <div class="bill-row">
+    <span>Wallet Balance</span>
+    <span>₹<span id="walletBalance">0</span></span>
+  </div>
+  <label>
+    <input type="checkbox" id="useWallet" onchange="render()"> Use wallet cash
+  </label>
+</div>
+<div class="section">
+  <h3>💳 Payment Method</h3>
+
+  <div class="pay-option">
+    <input type="radio" name="payment" value="UPI" checked>
+    <label>UPI (PhonePe / GPay)</label>
+  </div>
+
+  <div class="pay-option">
+    <input type="radio" name="payment" value="CARD">
+    <label>Card / NetBanking</label>
+  </div>
+
+  <div class="pay-option">
+    <input type="radio" name="payment" value="COD">
+    <label>Cash on Delivery</label>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Bill Details</h3>
+  <div class="bill-row"><span>Item Total</span><span id="itemTotal">₹0</span></div>
+  <div class="bill-row"><span>Delivery Fee</span><span>₹20</span></div>
+  <div class="bill-row"><span>Platform Fee</span><span>₹5</span></div>
+  <div class="bill-row"><span>GST (5%)</span><span id="gst">₹0</span></div>
+  <div class="bill-row"><span>Coupon Discount</span><span>-₹<span id="discountAmount">0</span></span></div>
+  <hr>
+  <div class="bill-row bill-total">
+    <span>To Pay</span>
+    <span id="grandTotal">₹0</span>
+  </div>
+</div>
+
+<div class="footer">
+  <button class="place-btn" onclick="placeOrder()">Pay & Place Order</button>
+</div>
+
+<script>
+/* WALLET FOR NEW USERS */
+if (!localStorage.getItem("walletInitialized")) {
+  localStorage.setItem("walletBalance", "100");
+  localStorage.setItem("walletInitialized", "true");
+}
+
+let discount = 0;
+let walletUsed = 0;
+
+const coupons = {
+  QUICKGO50: 50,
+  GROCERY20: 20,
+  FIRST10: 10,
+  NEWUSER100: 100,
+  SAVE30: 30
+};
+
+function getCart() {
+  return JSON.parse(localStorage.getItem("groceryCart")) || [];
+}
+
+function render() {
+  const cart = getCart();
+  const itemsDiv = document.getElementById("items");
+  itemsDiv.innerHTML = "";
+
+  if (cart.length === 0) {
+    itemsDiv.innerHTML = `
+      <p style="color:#6b7280;text-align:center;">
+        🛒 Your cart is empty.<br>
+        <a href="groceries.html">Go back to groceries</a>
+      </p>`;
+    return;
+  }
+
+  let total = 0;
+
+  cart.forEach(item => {
+    total += item.price * item.qty;
+    itemsDiv.innerHTML += `
+      <div class="item">
+        <div><b>${item.name}</b><br>₹${item.price}</div>
+        <div class="qty">
+          <button onclick="updateQty('${item.name}',-1)">−</button>
+          <span>${item.qty}</span>
+          <button onclick="updateQty('${item.name}',1)">+</button>
+        </div>
+      </div>`;
+  });
+
+  const gst = Math.round(total * 0.05);
+  let payable = total + gst + 25 - discount;
+
+  const walletBalance = parseInt(localStorage.getItem("walletBalance"));
+  document.getElementById("walletBalance").innerText = walletBalance;
+
+  if (document.getElementById("useWallet").checked) {
+    walletUsed = Math.min(walletBalance, payable);
+    payable -= walletUsed;
+  } else walletUsed = 0;
+
+  document.getElementById("itemTotal").innerText = "₹" + total;
+  document.getElementById("gst").innerText = "₹" + gst;
+  document.getElementById("discountAmount").innerText = discount;
+  document.getElementById("grandTotal").innerText = "₹" + payable;
+}
+
+function updateQty(name, delta) {
+  let cart = getCart();
+  let item = cart.find(i => i.name === name);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.name !== name);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  render();
+}
+function getSelectedPayment() {
+  const method = document.querySelector('input[name="payment"]:checked');
+  return method ? method.value : "UPI";
+}
+
+function applyCoupon() {
+  const code = couponInput.value.trim().toUpperCase();
+  if (coupons[code]) {
+    discount = coupons[code];
+    couponMsg.innerText = `Coupon applied! ₹${discount} OFF`;
+    render();
+  } else couponMsg.innerText = "Invalid coupon";
+}
+
+function placeOrder() {
+  let walletBalance = parseInt(localStorage.getItem("walletBalance"));
+  walletBalance -= walletUsed;
+  localStorage.setItem("walletBalance", walletBalance);
+  localStorage.removeItem("groceryCart");;
+  alert("🎉 Order placed successfully!");
+  location.href = "groceries.html";
+const paymentMethod = getSelectedPayment();
+alert(`🎉 Order placed!\nPayment: ${paymentMethod}`);
+}
+
+render();
+</script>
+
+</body>
+</html>
+

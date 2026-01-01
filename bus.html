@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bus Tickets – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f3f4f6;
+}
+
+header{
+  background:#111827;
+  color:#fff;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:bold;
+}
+
+.back-btn{
+  background:#fff;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.card{
+  background:#fff;
+  margin:14px;
+  padding:14px;
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:12px;
+}
+
+.bus{
+  border:1px solid #eee;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+
+.bus-title{
+  font-weight:bold;
+}
+
+.bus-info{
+  font-size:13px;
+  color:#6b7280;
+  margin-top:4px;
+}
+
+.bus-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+}
+
+.price{
+  font-weight:bold;
+  color:#16a34a;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="back-btn" onclick="location.href='travel.html'">← Back</button>
+  <span>🚌 Bus Tickets</span>
+</header>
+
+<div class="card">
+  <label>From</label>
+  <input id="from" placeholder="City / Town">
+
+  <label>To</label>
+  <input id="to" placeholder="Destination">
+
+  <label>Date</label>
+  <input type="date" id="date">
+
+  <button onclick="searchBuses()">Search Buses</button>
+</div>
+
+<div class="card" id="busResults" style="display:none">
+  <h3>Available Buses</h3>
+  <div id="busList"></div>
+</div>
+
+<script>
+if(localStorage.getItem("isLoggedIn")!=="true"){
+  location.href="login.html";
+}
+
+function searchBuses(){
+  const from = document.getElementById("from").value.trim();
+  const to = document.getElementById("to").value.trim();
+  const date = document.getElementById("date").value;
+
+  if(!from || !to || !date){
+    alert("Please fill all fields");
+    return;
+  }
+
+  const buses = [
+    {name:"Orange Travels", type:"AC Sleeper", time:"22:30", price:1200, seats:12},
+    {name:"VRL Travels", type:"Non-AC Seater", time:"21:00", price:850, seats:18},
+    {name:"KSRTC", type:"AC Seater", time:"19:45", price:650, seats:22},
+    {name:"TSRTC", type:"Non-AC", time:"20:15", price:500, seats:30}
+  ];
+
+  busList.innerHTML = "";
+  buses.forEach(b=>{
+    busList.innerHTML += `
+      <div class="bus">
+        <div class="bus-title">${b.name}</div>
+        <div class="bus-info">${b.type} • ${b.time}</div>
+        <div class="bus-footer">
+          <span class="price">₹${b.price}</span>
+          <button onclick="bookBus('${b.name}',${b.price})"
+            style="width:auto;padding:6px 12px">Book</button>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("busResults").style.display="block";
+}
+
+function bookBus(name, price){
+  localStorage.setItem("selectedBus", JSON.stringify({
+    name, price
+  }));
+  location.href = "bus-seat.html";
+}
+</script>
+
+</body>
+</html>
+

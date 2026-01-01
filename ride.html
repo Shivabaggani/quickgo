@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuickGo Travel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{margin:0;font-family:Arial;background:#f5f5f5}
+header{display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border-bottom:1px solid #eee}
+.menu{font-size:22px;cursor:pointer}
+
+/* ✅ BACK BUTTON (ADDED ONLY) */
+.back-btn{
+  background:#f3f4f6;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.location-box{background:#fff;margin:12px;padding:14px;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.loc{display:flex;gap:10px;margin-bottom:10px}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:6px}
+.green{background:#16a34a}.red{background:#dc2626}
+.loc input{border:none;width:100%;font-size:14px;outline:none}
+.map{height:260px;margin:12px;border-radius:14px;overflow:hidden}
+.services{background:#fff;margin:12px;padding:12px;border-radius:14px}
+.service{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;border:2px solid transparent;margin-bottom:10px;cursor:pointer}
+.service.active{border-color:#2563eb;background:#eef2ff}
+button{width:calc(100% - 24px);margin:12px;padding:14px;background:#facc15;border:none;border-radius:14px;font-size:16px;font-weight:bold;cursor:pointer}
+.payment{background:#fff;margin:12px;padding:12px;border-radius:14px}
+</style>
+</head>
+
+<body>
+
+<header>
+ 
+  <div class="menu">☰</div>
+  <b>QuickGo</b>
+</header>
+
+<div class="location-box">
+  <div class="loc">
+    <div class="dot green"></div>
+    <input id="pickup" readonly placeholder="Detecting current location...">
+  </div>
+  <div class="loc">
+    <div class="dot red"></div>
+    <input id="drop" placeholder="Enter drop location" oninput="calculateFare()">
+  </div>
+</div>
+
+<div class="map">
+  <iframe id="map" width="100%" height="100%" style="border:0"></iframe>
+</div>
+<!-- ✅ BACK BUTTON (AFTER MAP ONLY) -->
+<div style="margin:12px;">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+</div>
+
+<div class="services">
+  <div class="service active" onclick="selectRide('Bike',this)">🏍 Bike <span id="bikeFare">₹0</span></div>
+  <div class="service" onclick="selectRide('Auto',this)">🛺 Auto <span id="autoFare">₹0</span></div>
+  <div class="service" onclick="selectRide('Cab',this)">🚗 Cab <span id="cabFare">₹0</span></div>
+</div>
+
+<div class="payment">
+  <label><input type="radio" name="pay" value="cash" checked> Cash</label><br>
+  <label><input type="radio" name="pay" value="wallet"> Wallet</label><br>
+  <label><input type="radio" name="pay" value="upi"> UPI</label>
+</div>
+
+<button onclick="bookRide()">Continue Booking</button>
+
+<script>
+if(localStorage.getItem("isLoggedIn")!=="true") location.href="login.html";
+
+let pickupCoord=null, km=0, rideType="Bike", baseFare=0;
+let wallet=Number(localStorage.getItem("walletBalance"))||0;
+
+const drivers=[
+  {name:"Ravi",rating:4.6},
+  {name:"Suresh",rating:4.4},
+  {name:"Anil",rating:4.7},
+  {name:"Kiran",rating:4.5}
+];
+
+// GPS pickup
+navigator.geolocation.getCurrentPosition(pos=>{
+  pickupCoord={lat:pos.coords.latitude,lon:pos.coords.longitude};
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pickupCoord.lat}&lon=${pickupCoord.lon}`)
+  .then(r=>r.json()).then(d=>pickup.value=d.display_name);
+});
+
+// Geo coding
+async function geo(place){
+  let r=await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+place);
+  let d=await r.json();return{lat:d[0].lat,lon:d[0].lon};
+}
+
+async function calculateFare(){
+  if(!pickupCoord||!drop.value) return;
+  let d=await geo(drop.value);
+  map.src=`https://www.openstreetmap.org/export/embed.html?bbox=${pickupCoord.lon},${pickupCoord.lat},${d.lon},${d.lat}`;
+  let r=await fetch(`https://router.project-osrm.org/route/v1/driving/${pickupCoord.lon},${pickupCoord.lat};${d.lon},${d.lat}`);
+  let j=await r.json(); km=(j.routes[0].distance/1000).toFixed(1);
+
+  let surge=(new Date().getHours()>=18&&new Date().getHours()<=21)?1.5:1;
+
+  bikeFare.innerText="₹"+Math.round((20+km*10)*surge);
+  autoFare.innerText="₹"+Math.round((30+km*15)*surge);
+  cabFare.innerText="₹"+Math.round((50+km*20)*surge);
+}
+
+function selectRide(t,el){
+  document.querySelectorAll(".service").forEach(s=>s.classList.remove("active"));
+  el.classList.add("active"); rideType=t;
+}
+
+function bookRide(){
+  if(!km){alert("Enter drop location");return;}
+  let price = rideType==="Bike"?bikeFare.innerText:rideType==="Auto"?autoFare.innerText:cabFare.innerText;
+  price=Number(price.replace("₹",""));
+  let pay=document.querySelector("input[name=pay]:checked").value;
+
+  if(pay==="wallet" && wallet<price){alert("Low wallet balance");return;}
+  if(pay==="wallet"){wallet-=price;localStorage.setItem("walletBalance",wallet);}
+
+  let driver=drivers[Math.floor(Math.random()*drivers.length)];
+
+  localStorage.setItem("currentRide",JSON.stringify({
+    pickup:pickup.value,
+    drop:drop.value,
+    km,price,rideType,payment:pay,
+    driver,status:"assigned",time:Date.now()
+  }));
+
+  location.href="travel-tracking.html";
+}
+
+/* ✅ BACK FUNCTION (ADDED ONLY) */
+function goBack(){
+  location.href = "travel.html";
+}
+</script>
+</body>
+</html>
+
+

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wallet – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  padding: 0;
+  margin: 0;
+  background:#f3f6fb;
+}
+
+/* HEADER */
+header {
+  background:#60a5fa;
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+header h2 {
+  margin:0;
+  font-size:18px;
+}
+
+.icon-btn {
+  background:#fff;
+  color:#2563eb;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* WALLET CARD */
+.container {
+  padding:20px;
+}
+
+.card {
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+  text-align:center;
+}
+
+.balance {
+  font-size:28px;
+  font-weight:bold;
+  color:#16a34a;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <button class="icon-btn" onclick="goHome()">🏠</button>
+  <h2>Wallet</h2>
+  <div></div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div>Available Balance</div>
+    <div class="balance">₹<span id="balance">0</span></div>
+  </div>
+</div>
+
+<script>
+// 🔐 LOGIN PROTECTION
+if (localStorage.getItem("isLoggedIn") !== "true") {
+  alert("Please login first");
+  location.href = "login.html";
+}
+
+// 💰 LOAD WALLET
+let wallet = Number(localStorage.getItem("wallet"));
+if (isNaN(wallet)) wallet = 0;
+
+localStorage.setItem("wallet", wallet);
+document.getElementById("balance").innerText = wallet;
+
+// 🏠 HOME
+function goHome() {
+  location.href = "travel.html";
+}
+</script>
+
+</body>
+</html>

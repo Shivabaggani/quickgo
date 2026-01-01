@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Rate Order – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+  background:#f3f6fb;
+}
+
+.star {
+  font-size: 32px;
+  cursor: pointer;
+  color:#ccc;
+}
+
+button {
+  margin-top:12px;
+  width:100%;
+  padding:12px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>⭐ Rate your order</h2>
+
+<div id="stars">
+  <span class="star" onclick="rate(1)">★</span>
+  <span class="star" onclick="rate(2)">★</span>
+  <span class="star" onclick="rate(3)">★</span>
+  <span class="star" onclick="rate(4)">★</span>
+  <span class="star" onclick="rate(5)">★</span>
+</div>
+
+<textarea id="review"
+  placeholder="Write a review..."
+  style="width:100%;height:80px;margin-top:10px;">
+</textarea>
+
+<button onclick="submitReview()">Submit</button>
+
+<script>
+// 🔐 LOGIN PROTECTION
+if (localStorage.getItem("isLoggedIn") !== "true") {
+  alert("Please login first");
+  location.href = "login.html";
+}
+
+// 📦 LOAD DELIVERED ORDER
+let order = JSON.parse(localStorage.getItem("deliveredOrder"));
+
+if (!order) {
+  alert("No order found to rate");
+  location.href = "index.html";
+}
+
+let rating = 0;
+
+// ⭐ STAR RATING
+function rate(n) {
+  rating = n;
+  document.querySelectorAll(".star").forEach((s, i) => {
+    s.style.color = i < n ? "gold" : "#ccc";
+  });
+}
+
+// 📤 SUBMIT REVIEW
+function submitReview() {
+  if (!rating) {
+    alert("Please select a rating");
+    return;
+  }
+
+  let history = JSON.parse(localStorage.getItem("orderHistory")) || [];
+
+  order.rating = rating;
+  order.review = document.getElementById("review").value.trim();
+  order.ratedAt = Date.now();
+
+  history.push(order);
+
+  localStorage.setItem("orderHistory", JSON.stringify(history));
+  localStorage.removeItem("deliveredOrder");
+
+  alert("Thanks for your feedback!");
+  location.href = "order-history.html";
+}
+</script>
+
+</body>
+</html>

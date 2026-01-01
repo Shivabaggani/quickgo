@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ride Tracking – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#111827;
+  color:#fff;
+}
+
+header{
+  padding:14px;
+  background:#000;
+  font-weight:bold;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* ✅ BACK BUTTON (ADDED ONLY) */
+.back-btn{
+  background:#fff;
+  color:#000;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.map{
+  height:55vh;
+}
+
+.card{
+  background:#fff;
+  color:#000;
+  margin:12px;
+  padding:14px;
+  border-radius:14px;
+}
+
+.status{
+  font-weight:bold;
+  color:#16a34a;
+  margin-bottom:6px;
+}
+
+.driver{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:#2563eb;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+.btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:8px;
+}
+
+.cancel{background:#ef4444;color:#fff}
+.share{background:#2563eb;color:#fff}
+.sos{background:#dc2626;color:#fff}
+
+/* RATING */
+.rating{
+  display:none;
+  text-align:center;
+  margin-top:10px;
+}
+.star{
+  font-size:28px;
+  cursor:pointer;
+  color:#ccc;
+}
+.star.active{color:#facc15}
+</style>
+</head>
+
+<body>
+
+<header>
+  <!-- ✅ BACK BUTTON (TOP LEFT – ADDED ONLY) -->
+  <button class="back-btn" onclick="goBack()">← Back</button>
+
+  <span>🚕 Tracking Ride</span>
+  <button class="btn sos" onclick="sendSOS()" style="width:auto;padding:6px 10px">🆘 SOS</button>
+</header>
+
+<div class="map">
+  <iframe id="mapFrame" width="100%" height="100%" style="border:0"></iframe>
+</div>
+
+<div class="card">
+  <div class="status" id="rideStatus">Driver assigned</div>
+
+  <div class="driver">
+    <div class="avatar">🏍</div>
+    <div>
+      <b id="driverName"></b><br>
+      ⭐ <span id="rating"></span>
+    </div>
+  </div>
+
+  <p><b>Fare:</b> ₹<span id="fare"></span></p>
+
+  <button class="btn share" onclick="shareRide()">📍 Share Live Ride</button>
+  <button class="btn cancel" onclick="cancelRide()">Cancel Ride</button>
+
+  <!-- RATING -->
+  <div class="rating" id="ratingBox">
+    <p>Rate your driver</p>
+    <span class="star" onclick="rate(1)">★</span>
+    <span class="star" onclick="rate(2)">★</span>
+    <span class="star" onclick="rate(3)">★</span>
+    <span class="star" onclick="rate(4)">★</span>
+    <span class="star" onclick="rate(5)">★</span>
+  </div>
+</div>
+
+<script>
+/* LOAD RIDE */
+const ride = JSON.parse(localStorage.getItem("currentRide"));
+if(!ride) location.href="travel.html";
+
+driverName.innerText = ride.driver.name;
+rating.innerText = ride.driver.rating;
+fare.innerText = ride.price;
+
+/* SAVE TO HISTORY */
+let history = JSON.parse(localStorage.getItem("rideHistory")) || [];
+history.push(ride);
+localStorage.setItem("rideHistory", JSON.stringify(history));
+
+/* GEOCODE */
+async function geo(place){
+  let r = await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(place));
+  let d = await r.json();
+  return {lat:+d[0].lat, lon:+d[0].lon};
+}
+
+/* DRIVER ANIMATION */
+let step=0;
+const steps=20;
+let pick, drop;
+
+async function start(){
+  pick = await geo(ride.pickup);
+  drop = await geo(ride.drop);
+  move();
+}
+
+function move(){
+  let lat = pick.lat + (drop.lat-pick.lat)*(step/steps);
+  let lon = pick.lon + (drop.lon-pick.lon)*(step/steps);
+
+  mapFrame.src =
+    `https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker=${lat},${lon}`;
+
+  if(step===0) rideStatus.innerText="Driver arriving...";
+  if(step===6) rideStatus.innerText="Ride started";
+  if(step===steps){
+    rideStatus.innerText="Ride completed ✔";
+    document.getElementById("ratingBox").style.display="block";
+    return;
+  }
+
+  step++;
+  setTimeout(move,2000);
+}
+
+start();
+
+/* SHARE RIDE */
+function shareRide(){
+  const link = location.href;
+  navigator.clipboard.writeText(link);
+  alert("Live ride link copied");
+}
+
+/* RATE DRIVER */
+function rate(n){
+  document.querySelectorAll(".star").forEach((s,i)=>{
+    s.classList.toggle("active", i<n);
+  });
+  alert("Thanks for rating ⭐"+n);
+}
+
+/* SOS */
+function sendSOS(){
+  alert("🚨 SOS sent!\nEmergency contacts notified.");
+}
+
+/* CANCEL */
+function cancelRide(){
+  if(ride.payment!=="cash"){
+    let w = Number(localStorage.getItem("walletBalance"))||0;
+    localStorage.setItem("walletBalance", w+ride.price);
+    alert("Refund credited to wallet");
+  } else {
+    alert("No refund for cash rides");
+  }
+
+  localStorage.removeItem("currentRide");
+  location.href="travel.html";
+}
+
+/* ✅ BACK FUNCTION (ADDED ONLY) */
+function goBack(){
+  location.href = "travel.html";
+}
+</script>
+
+</body>
+</html>
+

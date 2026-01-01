@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickGO – All-in-One Services</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #f3f4f6;
+    }
+
+    header {
+      background: #111827;
+      color: #fff;
+      padding: 14px 20px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .search-nav {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      min-width: 220px;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    .nav-links a:hover {
+      background: #1f2933;
+    }
+
+    .auth {
+      display: flex;
+      gap: 10px;
+    }
+
+    .auth a {
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .login {
+      border: 1px solid #fff;
+      color: #fff;
+    }
+
+    .signup {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    main {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.08);
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #2563eb;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 14px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="logo">QuickGo</div>
+
+    <div class="search-nav">
+      <input type="text" placeholder="Search services...">
+
+      <div class="nav-links">
+        <a href="food.html">Food</a>
+        <a href="travel.html">Travel</a>
+        <a href="groceries.html">Groceries</a>
+        <a href="electronics.html">Electronics</a>
+      </div>
+    </div>
+
+    <div class="auth">
+      <a href="login.html" class="login">Login</a>
+      <a href="signup.html" class="signup">Sign Up</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>🍔 Food</h2>
+    <p>Order food from restaurants.</p>
+    <a class="btn" href="food.html">Open Food</a>
+  </div>
+
+  <div class="card">
+    <h2>🏍 Travel</h2>
+    <p>Choose pickup & drop location.</p>
+    <a class="btn" href="travel.html">Go</a>
+  </div>
+
+  <div class="card">
+    <h2>🛒 Groceries</h2>
+    <p>Vegetables & daily essentials.</p>
+    <a class="btn" href="groceries.html">Open Groceries</a>
+  </div>
+
+  <div class="card">
+    <h2>📱 Electronics</h2>
+    <p>Mobiles, laptops & accessories.</p>
+    <a class="btn" href="electronics.html">Get Your Product</a>
+  </div>
+</main>
+
+<footer>
+  QuickGO demo website • Food | Travel | Groceries | Electronics
+</footer>
+
+</body>
+</html>
