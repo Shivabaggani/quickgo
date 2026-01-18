@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Restaurants – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f3f6fb;
+}
+
+/* HEADER */
+header {
+  background: #60a5fa;
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* BACK BUTTON */
+.back-btn {
+  background: #fff;
+  color: #2563eb;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* PAGE TITLE */
+header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+/* GRID */
+.restaurant-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.restaurant-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,.08);
+  cursor: pointer;
+}
+
+.restaurant-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.restaurant-info {
+  padding: 14px;
+}
+
+.restaurant-info h4 {
+  margin: 0 0 6px;
+}
+
+.details {
+  font-size: 13px;
+  color: #6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER WITH BACK BUTTON -->
+<header>
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <h2 id="pageTitle">Restaurants</h2>
+  <div></div>
+</header>
+
+<!-- RESTAURANTS -->
+<div class="restaurant-grid" id="restaurantGrid"></div>
+
+<script>
+// 🔐 LOGIN CHECK
+if (localStorage.getItem("isLoggedIn") !== "true") {
+  location.href = "login.html";
+}
+
+// 🔙 BACK BUTTON LOGIC
+function goBack() {
+  if (history.length > 1) {
+    history.back();
+  } else {
+    location.href = "food.html";
+  }
+}
+
+// 🍽️ DISH → RESTAURANTS MAP
+const dishRestaurants = {
+  biryani: {
+    title: "Chicken Biryani",
+    restaurants: [
+      {
+        name: "Biryani House",
+        key: "biryani",
+        img: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092"
+      }
+    ]
+  },
+  pizza: {
+    title: "Pizza",
+    restaurants: [
+      {
+        name: "Pizza Corner",
+        key: "pizza",
+        img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e"
+      }
+    ]
+  },
+  burger: {
+    title: "Burger",
+    restaurants: [
+      {
+        name: "Burger Hub",
+        key: "burger",
+        img: "https://images.unsplash.com/photo-1550547660-d9450f859349"
+      }
+    ]
+  },
+  veg: {
+    title: "Veg Meals",
+    restaurants: [
+      {
+        name: "Veg Treats",
+        key: "veg",
+        img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe"
+      }
+    ]
+  }
+};
+
+// 🔎 GET DISH FROM URL
+const params = new URLSearchParams(location.search);
+const dish = params.get("dish");
+
+if (!dish || !dishRestaurants[dish]) {
+  alert("No restaurants found");
+  location.href = "food.html";
+}
+
+// 🏷️ SET PAGE TITLE
+document.getElementById("pageTitle").innerText =
+  "Restaurants serving " + dishRestaurants[dish].title;
+
+// 🧱 RENDER RESTAURANTS
+const grid = document.getElementById("restaurantGrid");
+
+dishRestaurants[dish].restaurants.forEach(r => {
+  grid.innerHTML += `
+    <div class="restaurant-card"
+      onclick="location.href='menu.html?rest=${r.key}'">
+      <img src="${r.img}">
+      <div class="restaurant-info">
+        <h4>${r.name}</h4>
+        <div class="details">⭐ 4.4 • 30 mins</div>
+      </div>
+    </div>
+  `;
+});
+</script>
+
+</body>
+</html>

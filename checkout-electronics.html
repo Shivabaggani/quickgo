@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Checkout – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { margin:0; font-family:Arial; background:#eaeded; }
+.header { background:#131921; color:#fff; padding:12px; }
+.card { background:#fff; padding:16px; margin:12px; border-radius:6px; }
+button { padding:10px; border:none; border-radius:6px; cursor:pointer; width:100%; }
+.pay { background:#ffa41c; }
+</style>
+</head>
+
+<body>
+
+<div class="header">💳 Checkout</div>
+
+<div class="card" id="summary"></div>
+
+<script>
+let wallet = Number(localStorage.getItem("wallet")) || 0;
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let total = cart.reduce((s,i)=>s + i.price*i.qty, 0);
+
+document.getElementById("summary").innerHTML = `
+  <p><b>Order Total:</b> ₹${total}</p>
+  <p><b>Wallet Balance:</b> ₹${wallet}</p><br>
+  <button class="pay" onclick="pay()">Pay with Wallet</button>
+`;
+
+function pay(){
+  if(wallet >= total){
+    wallet -= total;
+    localStorage.setItem("wallet", wallet);
+    localStorage.removeItem("cart");
+
+    alert("Payment Successful 🎉");
+    location.href = "index.html";
+  } else {
+    alert("Insufficient Wallet Balance. Redirecting to recharge.");
+    location.href = "wallet-electronics.html";
+  }
+}
+</script>
+
+</body>
+</html>

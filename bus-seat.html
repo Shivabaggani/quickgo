@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Select Seats – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{margin:0;font-family:Arial;background:#f3f4f6}
+header{background:#111827;color:#fff;padding:14px;display:flex;align-items:center;gap:10px;font-weight:bold}
+.back-btn{background:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:bold}
+.card{background:#fff;margin:14px;padding:14px;border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,.08)}
+.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.seat{height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;background:#e5e7eb}
+.seat.booked{background:#9ca3af;cursor:not-allowed}
+.seat.selected{background:#2563eb;color:#fff}
+.legend{display:flex;gap:14px;font-size:13px;margin-top:10px}
+.box{width:14px;height:14px;border-radius:4px;display:inline-block}
+.available{background:#e5e7eb}
+.booked{background:#9ca3af}
+.selected{background:#2563eb}
+.footer{position:fixed;bottom:0;width:100%;background:#fff;padding:14px;box-shadow:0 -4px 12px rgba(0,0,0,.15)}
+.footer button{width:100%;padding:14px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:bold;cursor:pointer}
+.payment{margin-top:12px;font-size:14px}
+.payment input,.payment select{width:100%;padding:8px;margin-top:6px}
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="back-btn" onclick="location.href='bus.html'">← Back</button>
+  <span>🪑 Select Seats</span>
+</header>
+
+<div class="card">
+  <h3 id="busName"></h3>
+  <p>Tap to select seats</p>
+
+  <div class="seats" id="seatGrid"></div>
+
+  <div class="legend">
+    <span><span class="box available"></span> Available</span>
+    <span><span class="box selected"></span> Selected</span>
+    <span><span class="box booked"></span> Booked</span>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="payment">
+    <p><b>Payment Method</b></p>
+
+    <label>
+      <input type="radio" name="pay" value="wallet" checked>
+      Wallet (₹<span id="walletBal"></span>)
+    </label><br>
+
+    <label>
+      <input type="radio" name="pay" value="card">
+      Debit / Credit Card
+    </label><br>
+
+    <label>
+      <input type="radio" name="pay" value="netbanking">
+      Net Banking
+    </label>
+
+    <!-- CARD -->
+    <div id="cardBox" class="hidden">
+      <input id="cardNo" placeholder="Card Number">
+      <input id="exp" placeholder="MM/YY">
+      <input id="cvv" placeholder="CVV">
+    </div>
+
+    <!-- NET BANKING -->
+    <div id="bankBox" class="hidden">
+      <select id="bank">
+        <option value="">Select Bank</option>
+        <option>SBI</option>
+        <option>HDFC</option>
+        <option>ICICI</option>
+        <option>Axis</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Seats: <b id="seatCount">0</b> |
+  Total: ₹<b id="totalPrice">0</b>
+  <button onclick="confirmSeats()">Confirm & Pay</button>
+</div>
+
+<script>
+if(localStorage.getItem("isLoggedIn")!=="true"){
+  location.href="login.html";
+}
+
+const bus = JSON.parse(localStorage.getItem("selectedBus"));
+if(!bus) location.href="bus.html";
+
+busName.innerText = bus.name;
+
+let wallet = Number(localStorage.getItem("walletBalance")) || 0;
+walletBal.innerText = wallet;
+
+const seatGrid = document.getElementById("seatGrid");
+const selectedSeats = [];
+const bookedSeats = ["A1","B2","C3","D4"];
+const seatPrice = bus.price / 2;
+
+const rows=["A","B","C","D","E","F"], cols=[1,2,3,4];
+
+rows.forEach(r=>{
+  cols.forEach(c=>{
+    const seatNo=r+c;
+    const seat=document.createElement("div");
+    seat.className="seat";
+    seat.innerText=seatNo;
+    if(bookedSeats.includes(seatNo)) seat.classList.add("booked");
+    seat.onclick=()=>toggleSeat(seat,seatNo);
+    seatGrid.appendChild(seat);
+  });
+});
+
+function toggleSeat(el,seatNo){
+  if(el.classList.contains("booked")) return;
+  el.classList.toggle("selected");
+  selectedSeats.includes(seatNo)
+    ? selectedSeats.splice(selectedSeats.indexOf(seatNo),1)
+    : selectedSeats.push(seatNo);
+  updateSummary();
+}
+
+function updateSummary(){
+  seatCount.innerText=selectedSeats.length;
+  totalPrice.innerText=selectedSeats.length*seatPrice;
+}
+
+// 🔁 PAYMENT UI TOGGLE
+document.querySelectorAll('input[name="pay"]').forEach(r=>{
+  r.onchange=()=>{
+    cardBox.classList.toggle("hidden",r.value!=="card");
+    bankBox.classList.toggle("hidden",r.value!=="netbanking");
+  };
+});
+
+function confirmSeats(){
+  if(!selectedSeats.length){alert("Select seats");return;}
+  const total=selectedSeats.length*seatPrice;
+  const pay=document.querySelector('input[name="pay"]:checked').value;
+
+  if(pay==="wallet"){
+    if(wallet<total){alert("Insufficient wallet balance");return;}
+    wallet-=total;
+    localStorage.setItem("walletBalance",wallet);
+  }
+
+  if(pay==="card"){
+    if(!cardNo.value||!exp.value||!cvv.value){
+      alert("Enter card details");return;
+    }
+  }
+
+  if(pay==="netbanking" && !bank.value){
+    alert("Select bank");return;
+  }
+
+  let history=JSON.parse(localStorage.getItem("busBookings"))||[];
+  history.push({bus:bus.name,seats:selectedSeats,amount:total,payment:pay,time:Date.now()});
+  localStorage.setItem("busBookings",JSON.stringify(history));
+
+  localStorage.removeItem("selectedBus");
+  alert("🚌 Bus booking successful ✔");
+  location.href="travel.html";
+}
+</script>
+
+</body>
+</html>

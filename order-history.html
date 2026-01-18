@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Order History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body { font-family: Arial; padding:20px; background:#f3f6fb; }
+.card {
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📜 Order History</h2>
+<div id="list"></div>
+
+<script>
+let history = JSON.parse(localStorage.getItem("orderHistory")) || [];
+let list = document.getElementById("list");
+
+if (!history.length) {
+  list.innerHTML = "No orders yet";
+}
+
+history.forEach(o=>{
+  list.innerHTML += `
+    <div class="card">
+      <b>${o.address.label}</b><br>
+      ⭐ ${o.rating || "N/A"}<br>
+      ${o.review || ""}
+    </div>`;
+});
+</script>
+
+</body>
+</html>

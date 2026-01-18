@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuickGo Food</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f3f6fb;
+  padding-bottom:70px; /* ✅ space for checkout bar */
+}
+
+/* HEADER */
+header{
+  background:#60a5fa;
+  padding:14px 20px;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.back-btn{
+  background:#fff;
+  color:#2563eb;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.cart{
+  position:relative;
+  cursor:pointer;
+}
+
+.cart span{
+  position:absolute;
+  top:-8px;
+  right:-10px;
+  background:red;
+  color:white;
+  font-size:12px;
+  padding:2px 6px;
+  border-radius:50%;
+}
+
+.profile-icon{
+  width:36px;
+  height:36px;
+  background:#fff;
+  color:#2563eb;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* POPULAR FOODS */
+.popular-section{
+  padding:20px;
+}
+
+.popular-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
+}
+
+.food-card{
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+  text-align:center;
+  cursor:pointer;
+}
+
+.food-card img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+/* 🥞 TIFFINS */
+.tiffin-section{
+  padding:0 20px 20px;
+}
+
+.tiffin-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:16px;
+}
+
+.tiffin-card{
+  background:#fff;
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+
+.tiffin-card img{
+  width:100%;
+  height:100px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+/* RESTAURANTS */
+main{
+  padding:20px;
+}
+
+.restaurant-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+}
+
+.restaurant-card{
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 10px 20px rgba(0,0,0,.08);
+}
+
+.restaurant-card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+}
+
+.restaurant-info{
+  padding:14px;
+}
+
+.details{
+  font-size:13px;
+  color:#6b7280;
+}
+
+.order-btn{
+  display:inline-block;
+  padding:8px 12px;
+  background:#2563eb;
+  color:#fff;
+  text-decoration:none;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+/* PROFILE DRAWER */
+.profile-drawer{
+  position:fixed;
+  top:0;
+  right:0;
+  width:280px;
+  height:100%;
+  background:#fff;
+  box-shadow:-4px 0 16px rgba(0,0,0,.2);
+  transform:translateX(100%);
+  transition:transform .3s ease;
+  z-index:999;
+}
+
+.profile-drawer.active{
+  transform:translateX(0);
+}
+
+.profile-header{
+  background:#60a5fa;
+  color:#fff;
+  padding:20px;
+}
+
+.profile-item{
+  padding:14px 20px;
+  border-bottom:1px solid #eee;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.profile-item:hover{
+  background:#f3f4f6;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.3);
+  display:none;
+  z-index:998;
+}
+
+.overlay.show{
+  display:block;
+}
+
+/* =============================== */
+/* 🛒 PROCEED TO CHECKOUT (ADDED) */
+/* =============================== */
+.checkout-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#2563eb;
+  color:#fff;
+  padding:14px 20px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+  z-index:997;
+}
+
+.checkout-bar button{
+  background:#fff;
+  color:#2563eb;
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <h2>🍔 QuickGo Food</h2>
+
+  <div style="display:flex;gap:12px;align-items:center;">
+    <div class="cart" onclick="goCheckout()">🛒 <span id="cartCount">0</span></div>
+    <div class="profile-icon" onclick="openProfile()">👤</div>
+    <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:bold;">Logout</button>
+  </div>
+</header>
+
+<!-- POPULAR FOODS -->
+<section class="popular-section">
+  <h3>🔥 Popular Foods</h3>
+  <div class="popular-grid">
+    <div class="food-card" onclick="openFood('biryani')"><img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092"><h4>Biryani</h4></div>
+    <div class="food-card" onclick="openFood('pizza')"><img src="https://images.unsplash.com/photo-1513104890138-7c749659a591"><h4>Pizza</h4></div>
+    <div class="food-card" onclick="openFood('burger')"><img src="https://images.unsplash.com/photo-1550547660-d9450f859349"><h4>Burger</h4></div>
+    <div class="food-card" onclick="openFood('veg')"><img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe"><h4>Veg Meals</h4></div>
+  </div>
+</section>
+
+<!-- TIFFINS -->
+<section class="tiffin-section">
+  <h3>🥞 Popular Tiffins</h3>
+  <div class="tiffin-grid">
+    <div class="tiffin-card" onclick="openFood('idli')"><img src="https://images.unsplash.com/photo-1589302168068-964664d93dc0"><h4>Idli</h4></div>
+    <div class="tiffin-card" onclick="openFood('dosa')"><img src="https://images.unsplash.com/photo-1601050690597-df0568f70950"><h4>Dosa</h4></div>
+    <div class="tiffin-card" onclick="openFood('vada')"><img src="https://images.unsplash.com/photo-1627308595229-7830a5c91f9f"><h4>Vada</h4></div>
+    <div class="tiffin-card" onclick="openFood('poori')"><img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80"><h4>Poori</h4></div>
+    <div class="tiffin-card" onclick="openFood('upma')"><img src="https://images.unsplash.com/photo-1625395005224-0fce68a3cdc0"><h4>Upma</h4></div>
+  </div>
+</section>
+
+<!-- RESTAURANTS -->
+<main>
+  <h3>Popular Restaurants</h3>
+  <div class="restaurant-grid">
+    <div class="restaurant-card">
+      <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092">
+      <div class="restaurant-info">
+        <h4>Biryani House</h4>
+        <div class="details">⭐ 4.5 • 30 mins • Indian</div>
+        <a href="menu.html?rest=biryani" class="order-btn">Order Now</a>
+      </div>
+    </div>
+
+    <div class="restaurant-card">
+      <img src="https://images.unsplash.com/photo-1550547660-d9450f859349">
+      <div class="restaurant-info">
+        <h4>Burger Hub</h4>
+        <div class="details">⭐ 4.3 • 25 mins • Fast Food</div>
+        <a href="menu.html?rest=burger" class="order-btn">Order Now</a>
+      </div>
+    </div>
+
+    <div class="restaurant-card">
+      <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe">
+      <div class="restaurant-info">
+        <h4>Veg Treats</h4>
+        <div class="details">⭐ 4.6 • 20 mins • Pure Veg</div>
+        <a href="menu.html?rest=veg" class="order-btn">Order Now</a>
+      </div>
+    </div>
+
+    <div class="restaurant-card">
+      <img src="https://images.unsplash.com/photo-1593560708920-61dd98c46a4e">
+      <div class="restaurant-info">
+        <h4>Pizza Corner</h4>
+        <div class="details">⭐ 4.4 • 35 mins • Italian</div>
+        <a href="menu.html?rest=pizza" class="order-btn">Order Now</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- OVERLAY + PROFILE -->
+<div class="overlay" id="overlay" onclick="closeProfile()"></div>
+
+<div class="profile-drawer" id="profileDrawer">
+  <div class="profile-header">
+    <h3 id="userName">User</h3>
+    <p id="userContact">contact</p>
+  </div>
+  <div class="profile-item" onclick="location.href='order-history.html'">📦 Orders</div>
+  <div class="profile-item" onclick="location.href='wallet.html'">💰 Wallet</div>
+  <div class="profile-item" onclick="location.href='profile.html'">👤 Profile</div>
+  <div class="profile-item" onclick="logout()">🚪 Logout</div>
+</div>
+
+<!-- 🛒 CHECKOUT BAR (ADDED) -->
+<div class="checkout-bar" id="checkoutBar">
+  <span id="checkoutItems">0 items in cart</span>
+  <button onclick="goCheckout()">Proceed to Checkout →</button>
+</div>
+
+<script>
+// LOGIN CHECK
+if(localStorage.getItem("isLoggedIn")!=="true"){location.href="login.html";}
+
+// CART COUNT + CHECKOUT BAR
+function updateCartCount(){
+  let cart=JSON.parse(localStorage.getItem("cart"))||[];
+  let count=0;cart.forEach(i=>count+=i.qty);
+
+  document.getElementById("cartCount").innerText=count;
+
+  const bar=document.getElementById("checkoutBar");
+  const label=document.getElementById("checkoutItems");
+
+  if(count>0){
+    bar.style.display="flex";
+    label.innerText=count+" item"+(count>1?"s":"")+" in cart";
+  }else{
+    bar.style.display="none";
+  }
+}
+updateCartCount();
+
+function goCheckout(){
+  if(!Number(document.getElementById("cartCount").innerText)){
+    alert("Cart empty");
+    return;
+  }
+  location.href="checkout.html";
+}
+
+function goBack(){location.href="index.html";}function goBack(){
+  location.href = "index.html";
+}
+
+function logout(){localStorage.clear();location.href="index.html";}
+function openFood(i){location.href="food-restaurants.html?dish="+i;}
+
+function openProfile(){
+  document.body.style.overflow="hidden";
+  profileDrawer.classList.add("active");
+  overlay.classList.add("show");
+}
+
+function closeProfile(){
+  document.body.style.overflow="";
+  profileDrawer.classList.remove("active");
+  overlay.classList.remove("show");
+}
+
+// LOAD USER
+userName.innerText=localStorage.getItem("currentUserName")||"User";
+userContact.innerText=localStorage.getItem("currentUser")||"";
+</script>
+
+</body>
+</html>

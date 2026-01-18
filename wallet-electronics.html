@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wallet – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eaeded;
+}
+
+.header {
+  background: #131921;
+  color: #fff;
+  padding: 14px;
+  font-size: 18px;
+}
+
+.card {
+  background: #fff;
+  margin: 16px;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.balance {
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #ffd814;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover {
+  background: #f7ca00;
+}
+
+.note {
+  font-size: 13px;
+  color: #555;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">💰 Wallet Recharge</div>
+
+<div class="card">
+  <div class="balance">
+    Current Balance: ₹<span id="balance">0</span>
+  </div>
+
+  <input type="number" id="amount" placeholder="Enter recharge amount (₹)">
+
+  <button onclick="recharge()">Recharge Wallet</button>
+
+  <div class="note">
+    * This is a demo wallet recharge (no real payment).
+  </div>
+</div>
+
+<script>
+let wallet = Number(localStorage.getItem("wallet")) || 0;
+document.getElementById("balance").innerText = wallet;
+
+function recharge(){
+  const amt = Number(document.getElementById("amount").value);
+
+  if(amt <= 0){
+    alert("Enter a valid amount");
+    return;
+  }
+
+  wallet += amt;
+  localStorage.setItem("wallet", wallet);
+
+ alert("Wallet recharged successfully 🎉");
+
+const redirect = localStorage.getItem("returnAfterRecharge");
+
+if (redirect) {
+  localStorage.removeItem("returnAfterRecharge");
+  location.href = redirect;
+} else {
+  location.reload();
+}
+
+}
+</script>
+
+</body>
+</html>

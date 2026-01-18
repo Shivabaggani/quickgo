@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Menu – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body { margin:0;font-family:Arial;background:#f3f6fb; }
+
+header{
+  background:#60a5fa;
+  color:#fff;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.menu-grid{
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+}
+
+.menu-card{
+  background:#fff;
+  padding:16px;
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
+
+.price{ color:#2563eb;font-weight:bold;margin-bottom:8px; }
+
+.qty{ display:flex;gap:8px;align-items:center; }
+
+.qty button{
+  padding:4px 10px;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+}
+
+.add-btn{
+  width:100%;
+  padding:8px;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button onclick="history.back()"
+    style="background:#fff;color:#2563eb;
+           border:none;border-radius:6px;
+           padding:6px 10px;">← Back</button>
+  <h3 id="restName">Menu</h3>
+  <button onclick="location.href='checkout.html'"
+    style="background:#fff;color:#2563eb;
+           border:none;border-radius:6px;
+           padding:6px 10px;">🛒</button>
+</header>
+
+<div class="menu-grid" id="menuGrid"></div>
+
+<script>
+// 🔐 LOGIN CHECK
+if (localStorage.getItem("isLoggedIn") !== "true") {
+  location.href = "login.html";
+}
+
+// 📌 RESTAURANT MENUS
+const menus = {
+  biryani: {
+    name: "Biryani House",
+    items: [
+      { name: "Chicken Biryani", price: 160 },
+      { name: "Mutton Biryani", price: 220 },
+      { name: "Veg Biryani", price: 140 }
+    ]
+  },
+  burger: {
+    name: "Burger Hub",
+    items: [
+      { name: "Chicken Burger", price: 120 },
+      { name: "Veg Burger", price: 90 },
+      { name: "Cheese Burger", price: 150 }
+    ]
+  },
+  veg: {
+    name: "Veg Treats",
+    items: [
+      { name: "Veg Meals", price: 150 },
+      { name: "Paneer Curry", price: 110 },
+      { name: "Dal Rice", price: 100 }
+    ]
+  },
+  pizza: {
+    name: "Pizza Corner",
+    items: [
+      { name: "Margherita", price: 180 },
+      { name: "Farmhouse", price: 220 },
+      { name: "Paneer Pizza", price: 210 }
+    ]
+  }
+};
+
+// 🔎 GET REST ID
+const params = new URLSearchParams(location.search);
+const restId = params.get("rest");
+
+if (!restId || !menus[restId]) {
+  alert("Restaurant not found");
+  location.href = "food.html";
+}
+
+// 🏷️ SET TITLE
+document.getElementById("restName").innerText = menus[restId].name;
+
+// 🍽️ RENDER MENU
+const grid = document.getElementById("menuGrid");
+
+menus[restId].items.forEach(item => {
+  grid.innerHTML += `
+    <div class="menu-card">
+      <h4>${item.name}</h4>
+      <div class="price">₹${item.price}</div>
+      <div class="qty">
+        <button onclick="this.nextElementSibling.innerText =
+          Math.max(1, +this.nextElementSibling.innerText - 1)">−</button>
+        <span>1</span>
+        <button onclick="this.previousElementSibling.innerText =
+          +this.previousElementSibling.innerText + 1">+</button>
+      </div>
+      <button class="add-btn"
+        onclick="addToCart('${item.name}',${item.price},this)">
+        Add to Cart
+      </button>
+    </div>
+  `;
+});
+
+// 🛒 ADD TO CART
+function addToCart(name, price, btn){
+  const qty = +btn.parentElement.querySelector("span").innerText;
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  let item = cart.find(i => i.name === name);
+  if (item) item.qty += qty;
+  else cart.push({ name, price, qty });
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert(name + " added ✔");
+}
+</script>
+
+</body>
+</html>

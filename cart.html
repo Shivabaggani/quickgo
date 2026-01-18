@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cart – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eaeded;
+}
+
+.header {
+  background: #131921;
+  color: #fff;
+  padding: 14px;
+  font-size: 18px;
+}
+
+.card {
+  background: #fff;
+  padding: 14px;
+  margin: 14px;
+  border-radius: 6px;
+}
+
+.checkout {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  font-size: 15px;
+}
+
+.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.enabled {
+  background: #ffd814;
+  cursor: pointer;
+}
+
+a {
+  color: #0066c0;
+  text-decoration: none;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="color:red">NEW CART FILE LOADED</h1>
+
+<div class="header">🛒 Your Cart</div>
+
+<div id="cartItems"></div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let wallet = Number(localStorage.getItem("wallet")) || 0;
+
+const box = document.getElementById("cartItems");
+
+if (cart.length === 0) {
+  box.innerHTML = "<div class='card'>Cart is empty</div>";
+} else {
+  let total = 0;
+
+  cart.forEach(item => {
+    total += item.price * item.qty;
+    box.innerHTML += `
+      <div class="card">
+        <b>${item.name}</b><br>
+        ₹${item.price} × ${item.qty}
+      </div>
+    `;
+  });
+
+  if (wallet >= total) {
+    box.innerHTML += `
+      <div class="card">
+        <b>Total: ₹${total}</b><br>
+        <b>Wallet: ₹${wallet}</b><br><br>
+        <button class="checkout enabled" onclick="checkout()">
+          Proceed to Checkout
+        </button>
+      </div>
+    `;
+  } else {
+    box.innerHTML += `
+      <div class="card">
+        <b>Total: ₹${total}</b><br>
+        <b>Wallet: ₹${wallet}</b><br><br>
+
+        <button class="checkout disabled" disabled>
+          Insufficient Wallet Balance
+        </button>
+
+        <p style="margin-top:10px;color:#b12704;">
+          Recharge required.<br>
+          <a href="wallet-electronics.html">Recharge Wallet</a>
+        </p>
+      </div>
+    `;
+  }
+}
+
+function checkout() {
+  location.href = "checkout-electronics.html";
+}
+</script>
+
+</body>
+</html>

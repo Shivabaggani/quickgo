@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickGO – All-in-One Services</title>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f3f4f6;
+}
+
+header {
+  background: #111827;
+  color: #fff;
+  padding: 14px 20px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.search-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  min-width: 220px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.nav-links a:hover {
+  background: #1f2933;
+}
+
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth a {
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.login {
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+.signup {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* 👤 PROFILE ICON */
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  color: #111827;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* DRAWER */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  display: none;
+  z-index: 100;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100%;
+  background: #fff;
+  padding: 20px;
+  transform: translateX(100%);   /* 🔥 fully hidden */
+  transition: transform .3s ease;
+  z-index: 101;
+}
+
+.drawer.open {
+  transform: translateX(0);      /* 🔥 fully visible */
+}
+
+.drawer-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.drawer-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0 auto 10px;
+}
+
+.drawer-header p {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.drawer-btn {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.food-btn { background: #2563eb; color: #fff; }
+.profile-btn { background: #10b981; color: #fff; }
+.logout-btn { background: #ef4444; color: #fff; }
+
+main {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.08);
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+footer {
+  text-align: center;
+  padding: 14px;
+  color: #6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="logo">QuickGo</div>
+
+    <div class="search-nav">
+      <input type="text" placeholder="Search services...">
+      <div class="nav-links">
+        <a href="/food">Food</a>
+        <a href="/travel">Travel</a>
+        <a href="/groceries">Groceries</a>
+        <a href="/electronics">Electronics</a>
+        <a href="/hotels">Hotels</a>
+      </div>
+    </div>
+
+    <div class="auth">
+      <a href="login.html" class="login" id="loginBtn">Login</a>
+      <a href="signup.html" class="signup" id="signupBtn">Sign Up</a>
+
+      <a href="#" class="signup" id="logoutBtn"
+         style="display:none;background:#ef4444;"
+         onclick="logout()">Logout</a>
+
+      <!-- 👤 PROFILE ICON -->
+      <div class="profile-icon" id="profileIcon" onclick="openDrawer()">👤</div>
+    </div>
+  </div>
+</header>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<div class="drawer" id="profileDrawer">
+  <div class="drawer-header">
+    <div class="drawer-avatar" id="drawerAvatar">U</div>
+    <h3 id="drawerName">User</h3>
+    <p id="drawerContact">contact</p>
+  </div>
+
+  <button class="drawer-btn food-btn" onclick="goFood()">🍔 Go to Food</button>
+   <button class="drawer-btn travel-btn" onclick="travel()"> 🏍 Go to travel</button>
+  <button class="drawer-btn profile-btn" onclick="goProfile()">👤 My Profile</button>
+  <button class="drawer-btn logout-btn" onclick="logout()">🚪 Logout</button>
+</div>
+
+<main>
+  <div class="card">
+    <h2>🍔 Food</h2>
+    <p>Order food from restaurants.</p>
+    <a class="btn" href="#" onclick="openSection('food.html')">Open Food</a>
+  </div>
+
+  <div class="card">
+    <h2>🏍 Travel</h2>
+    <p>Choose pickup & drop location.</p>
+    <a class="btn" href="#" onclick="openSection('travel.html')">Go</a>
+  </div>
+
+  <div class="card">
+    <h2>🛒 Groceries</h2>
+    <p>Vegetables & daily essentials.</p>
+    <a class="btn" href="#" onclick="openSection('groceries.html')">Open Groceries</a>
+  </div>
+
+  <div class="card">
+    <h2>📱 Electronics</h2>
+    <p>Mobiles, laptops & accessories.</p>
+    <a class="btn" href="#" onclick="openSection('electronics.html')">Get Your Product</a>
+  </div>
+
+<div class="service-card">
+  <div class="card">
+  <h2>🏨 Hotels</h2>
+  <p>Book hotels & stays.</p>
+  <a class="btn" href="#" onclick="openSection('hotels.html')">Open Hotels</a>
+  </button>
+</div>
+
+   </button>
+</div>
+</main>
+
+<footer>
+  QuickGO demo website • Food | Travel | Groceries | Electronics
+</footer>
+
+<script>
+function updateAuthUI() {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const profileIcon = document.getElementById("profileIcon");
+
+  if (isLoggedIn === "true") {
+    loginBtn.style.display = "none";
+    signupBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    profileIcon.style.display = "flex";
+
+    const name = localStorage.getItem("currentUserName");
+    const contact = localStorage.getItem("currentUser");
+
+    if (name) {
+      document.getElementById("drawerName").innerText = name;
+      document.getElementById("drawerAvatar").innerText =
+        name.charAt(0).toUpperCase();
+    }
+    if (contact) {
+      document.getElementById("drawerContact").innerText = contact;
+    }
+  } else {
+    loginBtn.style.display = "inline-block";
+    signupBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+    profileIcon.style.display = "none";
+  }
+}
+
+function logout() {
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("currentUserName");
+  localStorage.removeItem("rememberMe");
+  window.location.href = "index.html";
+}
+
+function openDrawer(){
+  document.getElementById("profileDrawer").classList.add("open");
+  document.getElementById("drawerOverlay").style.display = "block";
+}
+
+function closeDrawer(){
+  document.getElementById("profileDrawer").classList.remove("open");
+  document.getElementById("drawerOverlay").style.display = "none";
+}
+
+function goFood(){
+  window.location.href = "food.html";
+}
+
+function goProfile(){
+  window.location.href = "profile.html";
+}
+
+function openSection(page) {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  if (isLoggedIn === "true") {
+    window.location.href = page;
+  } else {
+    if (confirm("You need to login.\nPress OK to Login\nCancel to Sign Up")) {
+      window.location.href = "login.html";
+    } else {
+      window.location.href = "signup.html";
+    }
+  }
+}
+
+updateAuthUI();
+</script>
+
+</body>
+</html>

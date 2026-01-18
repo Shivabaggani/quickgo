@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuickGo Travel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f3f4f6;
+}
+
+header{
+  padding:14px;
+  background:#111827;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:bold;
+}
+
+.back-btn{
+  background:#fff;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.services{
+  padding:16px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
+}
+
+.card{
+  background:#fff;
+  padding:22px;
+  border-radius:16px;
+  text-align:center;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+
+.card:hover{
+  transform:scale(1.03);
+}
+
+.icon{
+  font-size:36px;
+  margin-bottom:8px;
+}
+
+.desc{
+  font-size:13px;
+  color:#6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="back-btn" onclick="location.href='index.html'">← Back</button>
+  <span>🚀 Travel Services</span>
+</header>
+
+<div class="services">
+
+  <div class="card" onclick="openRide()">
+    <div class="icon">🏍</div>
+    <b>Bike / Cab</b>
+    <div class="desc">Book nearby rides</div>
+  </div>
+
+  <div class="card" onclick="openBus()">
+    <div class="icon">🚌</div>
+    <b>Bus Tickets</b>
+    <div class="desc">Intercity bus booking</div>
+  </div>
+
+  <div class="card" onclick="openTrain()">
+    <div class="icon">🚆</div>
+    <b>Train Tickets</b>
+    <div class="desc">Railway reservations</div>
+  </div>
+
+</div>
+
+<script>
+if(localStorage.getItem("isLoggedIn")!=="true"){
+  location.href="login.html";
+}
+
+function openRide(){
+  location.href = "ride.html";   // your existing Rapido code
+}
+
+function openBus(){
+  location.href = "bus.html";
+}
+
+function openTrain(){
+  alert("🚆 Train ticket booking coming soon");
+}
+</script>
+
+</body>
+</html>

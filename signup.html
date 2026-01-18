@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Account – QuickGo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.signup-box {
+  background: #fff;
+  padding: 28px;
+  width: 340px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #f59e0b;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e38b06;
+}
+
+.otp-box {
+  display: none;
+  margin-top: 10px;
+}
+
+.note {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 10px;
+}
+
+.signin-link {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.signin-link a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="signup-box">
+  <h2>Create Account</h2>
+
+  <label>Your name</label>
+  <input type="text" id="name" placeholder="First and last name">
+
+  <label>Email or mobile number</label>
+  <input type="text" id="contact" placeholder="Email or mobile number">
+
+  <label>Password</label>
+  <input type="password" id="pass" placeholder="At least 6 characters">
+
+  <label>Re-enter password</label>
+  <input type="password" id="repass" placeholder="Re-enter password">
+
+  <button onclick="sendOTP()">Continue</button>
+
+  <div class="otp-box" id="otpBox">
+    <label>Enter OTP</label>
+    <input type="text" id="otpInput" placeholder="Enter OTP">
+    <button onclick="verifySignup()">Verify & Create Account</button>
+  </div>
+
+  <div class="note">
+    By creating an account, you agree to QuickGo's Conditions of Use and Privacy Notice.
+  </div>
+
+  <div class="signin-link">
+    Already have an account? <a href="login.html">Sign in</a>
+  </div>
+</div>
+
+<script>
+// 🔁 CLEAN OLD OTP
+localStorage.removeItem("signupOTP");
+localStorage.removeItem("signupOTPExpiry");
+
+// STEP 1: SEND OTP
+function sendOTP() {
+  const name = document.getElementById("name").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const pass = document.getElementById("pass").value;
+  const repass = document.getElementById("repass").value;
+
+  if (!name || !contact || !pass || !repass) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  if (pass.length < 6) {
+    alert("Password must be at least 6 characters");
+    return;
+  }
+
+  if (pass !== repass) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  if (users.find(u => u.contact === contact)) {
+    alert("User already exists. Please login.");
+    location.href = "login.html";
+    return;
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  const expiry = Date.now() + 60000; // 60 sec
+
+  localStorage.setItem("signupOTP", otp);
+  localStorage.setItem("signupOTPExpiry", expiry);
+
+  alert("Your OTP is: " + otp + " (Valid for 60 seconds)");
+
+  document.getElementById("otpBox").style.display = "block";
+}
+
+// STEP 2: VERIFY OTP
+function verifySignup() {
+  const enteredOTP = document.getElementById("otpInput").value.trim();
+  const storedOTP = localStorage.getItem("signupOTP");
+  const expiry = localStorage.getItem("signupOTPExpiry");
+
+  if (!enteredOTP) {
+    alert("Please enter OTP");
+    return;
+  }
+
+  if (!storedOTP || Date.now() > expiry) {
+    alert("OTP expired. Please resend OTP.");
+    return;
+  }
+
+  if (enteredOTP !== storedOTP) {
+    alert("Incorrect OTP");
+    return;
+  }
+
+  localStorage.removeItem("signupOTP");
+  localStorage.removeItem("signupOTPExpiry");
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  users.push({
+    name: document.getElementById("name").value.trim(),
+    contact: document.getElementById("contact").value.trim(),
+    password: btoa(document.getElementById("pass").value)
+  });
+
+  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem(
+    "currentUser",
+    document.getElementById("contact").value.trim()
+  );
+
+  alert("Account created successfully ✔");
+  location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
